@@ -33,15 +33,15 @@ def depr_update_presence(buffer):
     return presence
 
 @numba.njit(fastmath=True)
-def update_presence(buffer):
+def update_presence(buffer, width):
 
     mem = numpy.zeros(len(buffer)) # 이거 안해도 되게끔 수정해야됨
 
     updated = buffer[:]
     for i in range(len(buffer)):
-        down = i + 800
-        left_down = i + 799
-        right_down = i + 801
+        down = i + width
+        left_down = i + width - 1
+        right_down = i + width + 1
         left = i - 1
         right = i + 1
 

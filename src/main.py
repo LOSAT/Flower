@@ -21,7 +21,7 @@ def os_pick(win, mac):
     else:
         return win
 
-screen_width, screen_height = os_pick((800, 600), (800 * 2, 600 * 2))
+screen_width, screen_height = (800, 600) # os_pick 2배 제거 (임시방편)
 
 
 fragment_buffer = numpy.zeros(screen_width * screen_height * 3)
@@ -29,7 +29,8 @@ presence_buffer = numpy.zeros(screen_width * screen_height)
 click = False
 fill_mode = None
 keys = {
-    "q": False
+    "q": False,
+    "w": False
 }
 
 
@@ -37,18 +38,18 @@ def indexize_normal(width, x, y):
     return (y * width + x)
 
 def fill_water(x, y):
-    if(indexize_normal(800, x, y) <= len(presence_buffer)):
-        index = indexize_normal(800, x, y)
+    if(indexize_normal(screen_width, x, y) <= len(presence_buffer)):
+        index = indexize_normal(screen_width, x, y)
         presence_buffer[index] = 1
 
 def fill_sand(x, y):
-    if(indexize_normal(800, x, y) <= len(presence_buffer)):
-        index = indexize_normal(800, x, y)
+    if(indexize_normal(screen_width, x, y) <= len(presence_buffer)):
+        index = indexize_normal(screen_width, x, y)
         presence_buffer[index] = 2
 
 def fill_stone(x, y):
-    if(indexize_normal(800, x, y) <= len(presence_buffer)):
-        index = indexize_normal(800, x, y)
+    if(indexize_normal(screen_width, x, y) <= len(presence_buffer)):
+        index = indexize_normal(screen_width, x, y)
         presence_buffer[index] = 3
 def on_click(_, button, action, __):
     global click
@@ -83,10 +84,10 @@ def on_move(window, x, y):
                         stone_fill_x = 0
                         stone_fill_y += 1
                     stone_fill_x += 1
+                elif keys["w"]:
+                    fill_sand(int_x + random_x, int_y + random_y)
                 else:
                     fill_water(int_x + random_x, int_y + random_y)
-            elif click == "right":
-                fill_sand(int_x + random_x, int_y + random_y)
 
 
 def on_key_event(window, key, scancode, action, mods):
@@ -129,10 +130,15 @@ def main(title, version):
             keys["q"] = True
         else:
             keys["q"] = False
+        
+        if get_key(window, KEY_W) == PRESS:
+            keys["w"] = True
+        else:
+            keys["w"] = False
         glClearColor(0, 0, 0, 255)
         glClear(GL_COLOR_BUFFER_BIT)
 
-        presence_buffer = update_presence(presence_buffer)
+        presence_buffer = update_presence(presence_buffer, screen_width)
         pre_render(presence_buffer, fragment_buffer)
 
         glDrawPixels(
