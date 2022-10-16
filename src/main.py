@@ -15,7 +15,13 @@ except:
     pass
 
 env = platform.system()
-screen_width, screen_height = (800, 600)
+def os_pick(win, mac):
+    if env == "Darwin":
+        return mac
+    else:
+        return win
+
+screen_width, screen_height = os_pick((800, 600), (800 * 2, 600 * 2))
 
 
 fragment_buffer = numpy.zeros(screen_width * screen_height * 3)
@@ -60,8 +66,8 @@ def on_click(_, button, action, __):
 def on_move(window, x, y):
     if click:
 
-        int_x = math.floor(x)
-        int_y = math.floor(y)
+        int_x = math.floor(os_pick(x, x * 2))
+        int_y = math.floor(os_pick(y, y * 2))
 
         random_range = 10
 
@@ -93,8 +99,8 @@ def main(title, version):
     time = 0
     init()
     window = create_window(
-        screen_width, 
-        screen_height, 
+        os_pick(screen_width, screen_width // 2), 
+        os_pick(screen_height, screen_height // 2), 
         f"{title} {version}", 
         None, 
         None
@@ -104,7 +110,14 @@ def main(title, version):
     set_cursor_pos_callback(window, on_move)
     set_key_callback(window, on_key_event)
 
-    glViewport(0, 0, screen_width, screen_height)
+    if env == "Darwin":
+        fb_width, fb_height = get_framebuffer_size(window)
+        _x = -(screen_width - fb_width) // 2
+        _y = -(screen_height - fb_height) // 2
+        glViewport(_x, _y, screen_width, screen_height)
+    else:
+        glViewport(0, 0, screen_width, screen_height)
+
     glMatrixMode(GL_PROJECTION)
     glLoadIdentity()
     glOrtho(0, screen_width, 0, screen_height, 0, 10)
