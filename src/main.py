@@ -21,11 +21,12 @@ def os_pick(win, mac):
     else:
         return win
 
-screen_width, screen_height = (800, 600) # os_pick 2배 제거 (임시방편)
+screen_width, screen_height = (1920, 1080) # os_pick 2배 제거 (임시방편)
 
 
 fragment_buffer = numpy.zeros(screen_width * screen_height * 3)
 presence_buffer = numpy.zeros(screen_width * screen_height)
+presence_data_buffer = numpy.zeros(screen_width * screen_height * 1)
 click = False
 fill_mode = None
 keys = {
@@ -138,7 +139,7 @@ def main(title, version):
         glClearColor(0, 0, 0, 255)
         glClear(GL_COLOR_BUFFER_BIT)
 
-        presence_buffer = update_presence(presence_buffer, screen_width)
+        presence_buffer = update_presence(presence_buffer, presence_data_buffer, screen_width)
         pre_render(presence_buffer, fragment_buffer)
 
         glDrawPixels(

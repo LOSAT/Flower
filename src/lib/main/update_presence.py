@@ -33,12 +33,15 @@ def depr_update_presence(buffer):
     return presence
 
 @numba.njit(fastmath=True)
-def update_presence(buffer, width):
+def update_presence(buffer, data, width):
 
     mem = numpy.zeros(len(buffer)) # 이거 안해도 되게끔 수정해야됨
 
     updated = buffer[:]
     for i in range(len(buffer)):
+
+        velocity = data[i]
+
         down = i + width
         left_down = i + width - 1
         right_down = i + width + 1
@@ -68,32 +71,44 @@ def update_presence(buffer, width):
                     updated[i] = 0
                     updated[left_down] = 2
                     mem[left_down] = 2 
-        if buffer[i] == 1 and mem[i] == 0:
 
-            if exists(buffer, down):
-                if buffer[down] == 0:
-                    updated[i] = 0
-                    updated[down] = 1
-                    mem[down] = 1 
-                    continue
-            if exists(buffer, right_down):
+        if buffer[i] == 1 and mem[i] == 0: # 물
+            if buffer[down] != 0:
+                data[i] = 0
+            else:
+                data[i] += 2
+
+            max_dist = 0
+            for y in range(1, data[i] + 1):
+                if exists(buffer, down + width * y):
+                    if buffer[down + width * y] != 0:
+                        break
+                    max_dist += 1
+
+            max_dist -= 1
+            updated[i] = 0
+            updated[down + width * max_dist] = 1
+            mem[down + width * max_dist] = 1
+
+            if exists(buffer, right_down) and max_dist == -1:
                 if buffer[right_down] == 0:
                     updated[i] = 0
                     updated[right_down] = 1
                     mem[right_down] = 1 
                     continue
-            if exists(buffer, left_down):
+            if exists(buffer, left_down) and max_dist == -1:
                 if buffer[left_down] == 0:
                     updated[i] = 0
                     updated[left_down] = 1
-                    mem[left_down] = 1 
-            if exists(buffer, right):
+                    mem[left_down] = 1
+                    continue
+            if exists(buffer, right) and max_dist == -1:
                 if buffer[right] == 0:
                     updated[i] = 0
                     updated[right] = 1
                     mem[right] = 1 
                     continue
-            if exists(buffer, left):
+            if exists(buffer, left) and max_dist == -1:
                 if buffer[left] == 0:
                     updated[i] = 0
                     updated[left] = 1
